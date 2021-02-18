@@ -38,6 +38,10 @@ class ERPLBot(discord.Client):
         This function runs whenever a new member joins the server
         """
         print(f"{member.name} joined")
+        # Give em' the default role
+        recruit_role = guild.get_role(RECRUIT_ROLE_ID)
+        await member.add_roles(member_role, reason='Member join')
+        # Create the DM by default
         await member.create_dm()
         async with member.typing():
             # Here we will just call the update_members function
@@ -47,6 +51,31 @@ class ERPLBot(discord.Client):
         # Message member on join with welcome message
         await member.send(f"Hello {member.name}, welcome to *ERPL*!\n Please read our rules on #rules-info & we hope you rocket to success with us. 🚀\n If you've paid dues, Please set your nick to the name you filled out in payment of dues.\n * @ERPLDiscordBot should do the rest. (if it doesn't work, complain in #join-boost-system )*\n This will get you access to project channels.")
     
+    async def on_member_leave(self, discord_member):
+        """
+        This function runs whenever a new member leaves the server
+        """
+        print(f"{discord_member.name} left")
+        # Here we will just call the update_members function
+        spreadsheet_members = get_members_from_spreadsheet(google_sheets, SPREADSHEET_ID, SHEET_NAME + ':'.join([RANGE_START, RANGE_END]))
+        # We need to check if they are in the spread
+        # First though, we need to get their name
+        name = None
+
+        # If this member has no nickname
+        if discord_member.nick is None:
+            name = Name.from_str(discord_member.name)
+        # If they do have a nickname
+        else:
+            name = Name.from_str(discord_member.nick)
+
+        # Iterate through each member in the spreadsheet (Ideally we would search the reverse of this list getting the most recent entries)
+        for member in spreadsheet_members:
+            # Check if their name is in the spreadsheet
+            if member.rolled:
+                # Set them to false if they left as a member
+                member.update_rolled(google_sheets, SPREADSHEET_ID, SHEET_NAME, RANGE_END, False)
+
     async def on_member_update(self, before, after,resetMember):
         """
         This function runs whenever a new member updates their own profile, like changing their nickname
@@ -59,19 +88,23 @@ class ERPLBot(discord.Client):
         """
         This function runs whenever a message is sent
         """
+        # Ignore our own messages
         if message.author == self.user:
             return
 
         # WaterLubber easteregg
-        if message.content == 'Waterlubber':
-            async with message.channel.typing():
-                await message.guild.me.edit(nick='Waterlubber')
-                await message.channel.send('*Hello my name is Paul and I like to code!*')
-                await message.delete()
-                await message.guild.me.edit(nick='ERPL Discord Bot')
+        try:
+            if message.content == 'Waterlubber':
+                async with message.channel.typing():
+                    await message.guild.me.edit(nick='Waterlubber')
+                    await message.channel.send('*Hello my name is Paul and I like to code!*')
+                    await message.delete()
+                    await message.guild.me.edit(nick='ERPL Discord Bot')
 
-        elif ('waterlubber' in message.content.lower()):
-            await message.delete()
+            elif ('waterlubber' in message.content.lower()):
+                await message.delete()
+        except:
+            print("An exception occurred during Waterlubber")
 
     async def update_members(self, guild,resetMember):
         """
