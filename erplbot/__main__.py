@@ -5,7 +5,7 @@ from erplbot.sheets import GoogleSheets, retrieve_credentials
 # Try to get variables from pickled config
 try:
     print('Loading Config')
-    [BOT_TOKEN, SPREADSHEET_ID, SHEET_NAME, RANGE_START, RANGE_END, MEMBER_ROLE_ID, RECRUIT_ROLE_ID] = pickle.load(open ("config.bin", "rb"))
+    [BOT_TOKEN, SPREADSHEET_ID, SHEET_NAME, RANGE_START, RANGE_END, MEMBER_ROLE_ID, OFFICER_ROLE_ID, PROJECT_LEAD_ID, RECRUIT_ROLE_ID] = pickle.load(open ("config.bin", "rb"))
 except Exception as e:
     print(f"An exception occurred while loading config.bin\n{e}")
 # This variable will store our GoogleSheets instance
@@ -45,6 +45,7 @@ class ERPLBot(discord.Client):
             await self.update_members(member.guild)
             # Add a welcome message/embed here
 
+
         # Message member on join with welcome message
         await member.send(f"Hello {member.name}, welcome to *ERPL*!\n Please read our rules on #rules-info & we hope you rocket to success with us. 🚀\n If you've paid dues, Please set your nick to the name you filled out in payment of dues.\n *@ERPLDiscordBot should do the rest. (if it doesn't work, complain in #join-boost-system )*\n This will get you access to project channels.")
     
@@ -79,19 +80,53 @@ class ERPLBot(discord.Client):
         if message.author == self.user:
             return
 
+
+
+        #Clay
+        if message.channel.id == 821147004238954527:
+            #Command for creating a new project text (through dm)
+            try:
+                #CreateProject
+                if '~CreateProject' in message.content:
+
+                    #Check to make sure the person sending the message has correct role:
+                    # Comb through the roles of who sent the message to look for Officer name  
+                    if 'Officer' in [x.name for x in message.author.roles]:
+
+
+                        #Check to make sure the channel/project does not already exist
+
+
+                        #attempt to split and save the project name
+                        try:
+                            projectName = message.content.split(' ')[1]
+                            if projectName == "":
+                               print("Project name empty")
+
+
+                            #Send a message back to confirm creation
+                            await message.channel.send("Project " + projectName + " Created")
+                        except:
+                            await message.channel.send("Error creating the project. Please use the format: '~CreateProject (projectName)'")
+
+            except Exception as e:
+                print(f"An exception occured while creating a new project\n{e}")
+
+
         # WaterLubber easteregg
         try:
             if message.content == 'Waterlubber':
                 async with message.channel.typing():
                     await message.guild.me.edit(nick='Waterlubber')
                     await message.channel.send('*Hello my name is Paul and I like to code!*')
-                    await message.delete()
                     await message.guild.me.edit(nick='ERPL Discord Bot')
-
             elif ('waterlubber' in message.content.lower()):
                 await message.delete()
         except:
             print("An exception occurred during Waterlubber")
+
+        
+
             
     async def update_members(self, guild):
         """
