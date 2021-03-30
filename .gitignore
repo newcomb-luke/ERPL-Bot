@@ -133,3 +133,4 @@ erplbot/reset*
 
 # No send secrets
 secrets.json
+config.bin`
