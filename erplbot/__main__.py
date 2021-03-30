@@ -83,29 +83,35 @@ class ERPLBot(discord.Client):
 
 
         #Clay
+
+        #Command for creating a new project 
+        #Make sure channel is specified
         if message.channel.id == BOT_COMMAND_CHANNEL:
-            #Command for creating a new project text (through dm)
             try:
                 #CreateProject
                 if '~CreateProject' in message.content:
 
                     #Check to make sure the person sending the message has correct role:
                     # Comb through the roles of who sent the message to look for Officer name  
-                    if 'Officer' in [x.name for x in message.author.roles]:
-
-
-                        #Check to make sure the channel/project does not already exist
-
+                    if 'Officer' in [role.name for role in message.author.roles]:
 
                         #attempt to split and save the project name
                         try:
                             projectName = message.content.split(' ')[1]
                             if projectName == "":
-                               print("Project name empty")
-
-
-                            #Send a message back to confirm creation
-                            await message.channel.send("Project " + projectName + " Created")
+                               await message.channel.send("Project name is empty")
+                            else:
+                                # get category, names, and channels
+                                for category in message.guild.categories:                                  
+                                    if category.name == "Projects":
+                                        print(category.channels)
+                                        #Check to make sure the channel/project does not already exist 
+                                        if projectName in [channel.name for channel in category.channels]:
+                                            await message.channel.send("This channel already exists!")
+                                        else:
+                                            #Send a message back to confirm creation
+                                            await message.channel.send("Project " + projectName + " Created")      
+                        
                         except Exception as e:
                             print(f"User entry failed: {message.content} \n{e}")
                             await message.channel.send("Error creating the project. Please use the format: '~CreateProject (projectName)'")
