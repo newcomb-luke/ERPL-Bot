@@ -130,3 +130,6 @@ dmypy.json
 
 # Reset Scripts
 erplbot/reset*
+
+# No send secrets
+secrets.json

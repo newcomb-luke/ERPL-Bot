@@ -5,7 +5,7 @@ from erplbot.sheets import GoogleSheets, retrieve_credentials
 # Try to get variables from pickled config
 try:
     print('Loading Config')
-    [BOT_TOKEN, SPREADSHEET_ID, SHEET_NAME, RANGE_START, RANGE_END, MEMBER_ROLE_ID, OFFICER_ROLE_ID, PROJECT_LEAD_ID, RECRUIT_ROLE_ID] = pickle.load(open ("config.bin", "rb"))
+    [BOT_TOKEN, SPREADSHEET_ID, SHEET_NAME, RANGE_START, RANGE_END, MEMBER_ROLE_ID, OFFICER_ROLE_ID, PROJECT_LEAD_ID, RECRUIT_ROLE_ID, BOT_COMMAND_CHANNEL] = pickle.load(open ("config.bin", "rb"))
 except Exception as e:
     print(f"An exception occurred while loading config.bin\n{e}")
 # This variable will store our GoogleSheets instance
@@ -83,7 +83,7 @@ class ERPLBot(discord.Client):
 
 
         #Clay
-        if message.channel.id == 821147004238954527:
+        if message.channel.id == BOT_COMMAND_CHANNEL:
             #Command for creating a new project text (through dm)
             try:
                 #CreateProject
@@ -106,7 +106,8 @@ class ERPLBot(discord.Client):
 
                             #Send a message back to confirm creation
                             await message.channel.send("Project " + projectName + " Created")
-                        except:
+                        except Exception as e:
+                            print(f"User entry failed: {message.content} \n{e}")
                             await message.channel.send("Error creating the project. Please use the format: '~CreateProject (projectName)'")
 
             except Exception as e:
