@@ -11,3 +11,8 @@ This bot will update a person's role in the discord server when they change thei
 - [x] On user made member, send message.
 - [ ] Automation of group roles by messaging to the bot (member wants to join cardea chat, gets cardea role)
 - [ ] Add DECtalk tts (*John Madden*)
+
+## Operation
+ * Add requirements (*see requirements.txt*)
+ * Edit makeConfig to your values (*Discord bot token, spreadsheet ID, IDs from discord*)
+ * Run makeConfig to generate config.bin

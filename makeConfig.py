@@ -1,12 +1,11 @@
 import pickle
 # The bot's Discord Bot token
+BOT_TOKEN = ""
+# Sheets
+SPREADSHEET_ID = ""
 SHEET_NAME = 'Sheet1!'
 RANGE_START = 'A2'
 RANGE_END = 'D'
-
-# This is Discord's ID that means the "Member" role
-MEMBER_ROLE_ID = 000000000000000000
-RECRUIT_ROLE_ID = 000000000000000000
 
 ### This is Discord's ID that means the "Member" role
 MEMBER_ROLE_ID = 000000000000000000

@@ -5,7 +5,7 @@ from erplbot.sheets import GoogleSheets, retrieve_credentials
 # Try to get variables from pickled config
 try:
     print('Loading Config')
-    [BOT_TOKEN, SPREADSHEET_ID, SHEET_NAME, RANGE_START, RANGE_END, MEMBER_ROLE_ID, OFFICER_ROLE_ID, PROJECT_ROLE_ID, RECRUIT_ROLE_ID, JOIN_CHANNEL, BOT_COMMAND_CHANNEL] = pickle.load(open ("config.bin", "rb"))
+    [BOT_TOKEN, SPREADSHEET_ID, SHEET_NAME, RANGE_START, RANGE_END, MEMBER_ROLE_ID, OFFICER_ROLE_ID, PROJECT_ROLE_ID, RECRUIT_ROLE_ID, JOIN_CHANNEL, BOT_COMMAND_CHANNEL] = pickle.load(open("config.bin", "rb"))
 except Exception as e:
     print(f"An exception occurred while loading config.bin\n{e}")
 # This variable will store our GoogleSheets instance
