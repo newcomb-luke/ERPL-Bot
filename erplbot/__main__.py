@@ -88,14 +88,14 @@ class ERPLBot(discord.Client):
 
         #Clay's Commands
         #Make sure channel is specified
-        if message.channel.id == BOT_COMMAND_CHANNEL:
+        if message.channel == message.guild.get_channel(BOT_COMMAND_CHANNEL):
             #Command for creating a new project 
             try:
                 if '/CreateProject' in message.content:
 
                     #Check to make sure the person sending the message has correct role:
                     # Comb through the roles of who sent the message to look for Officer name  
-                    if OFFICER_ROLE_ID in message.author.roles:
+                    if message.guild.get_role(OFFICER_ROLE_ID) in message.author.roles:
 
                         #attempt to split and save the project name
                         try:
@@ -119,12 +119,16 @@ class ERPLBot(discord.Client):
                                         # Get the new project lead
                                         newProjectLead = message.guild.get_member_named(message.content.split(' ')[2])
                                         print(f"Project lead: {newProjectLead}")
+                                        # Assign Permissions to Project role (Add in specific permissions later, this is just the skeleton)
+                                        projectPerms = discord.Permissions(send_messages = False)
                                         # Create the Project role
-
+                                        projectRole = await message.guild.create_role(name=projectName, permissions=projectPerms)
                                         # Create the project channel
-                                        projectRole = ""
-                                        # Assign Permissions to channel
+                                        projectChannel = await message.guild.create_text_channel(name=projectName)
+                                        #Later, add "category="Projects"" after "name=projectName", currently this doesn't work however
                                         
+
+
                                         if subChatBool:
                                             print(f"Subchat: {subChatBool}")
                                             # Setup Sub-chat category & channel
@@ -176,8 +180,8 @@ class ERPLBot(discord.Client):
                                         # Remove the role from project lead
                                         oldProjectLead.remove_roles(message.guild.get_role(PROJECT_ROLE_ID))
                                         oldProjectLead.remove_roles(projectRole)
-                                        # Delete Role
-
+                                        # Delete Role (not tested, as i couldnt get the /deleteproject to work)
+                                        await projectRole.delete()
                                         # Send a message back to confirm deletion
                                         await message.channel.send(f"Project {projectName} deleted!")
                                         
@@ -222,8 +226,7 @@ class ERPLBot(discord.Client):
                     await message.guild.me.edit(nick='Waterlubber')
                     await message.channel.send('*Hello my name is Paul and I like to code!*')
                     await message.guild.me.edit(nick='ERPL Discord Bot')
-            elif ('waterlubber' in message.content.lower()):
-                await message.delete()
+
         except Exception as e:
             print(f"An exception occurred during Waterlubber:\n{e}")
 
