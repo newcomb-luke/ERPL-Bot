@@ -86,18 +86,19 @@ class ERPLBot(discord.Client):
         if message.author == self.user:
             return
 
-        #Clay's Commands
-        #Make sure channel is specified
+        """
+        Bot Commands
+        """
+        # Make sure channel is specified
         if message.channel == message.guild.get_channel(BOT_COMMAND_CHANNEL):
-            #Command for creating a new project 
+            """
+            Create Project Command (Officers Only)
+            """
             try:
                 if '/CreateProject' in message.content:
-
-                    #Check to make sure the person sending the message has correct role:
-                    # Comb through the roles of who sent the message to look for Officer name  
-                    if message.guild.get_role(OFFICER_ROLE_ID) in message.author.roles:
-
-                        #attempt to split and save the project name
+                    # Check to make sure the person sending the message has officer role
+                    if OFFICER_ROLE_ID in list(map(lambda role: role.id, message.author.roles)):
+                        # Attempt to split and save the project name
                         try:
                             if len(message.content.split(' '))<2:
                                await message.author.send("Project name is empty")
@@ -106,29 +107,28 @@ class ERPLBot(discord.Client):
                                 subChatBool = message.content.split(' ')[3]
                             else:
                                 subChatBool = True
-                            # get category, names, and channels
-                            for category in message.guild.categories:                                  
+                            # Get category, names, and channels
+                            for category in message.guild.categories:
                                 if category.name == "Projects":
                                     print(category.channels)
-                                    #Check to make sure the channel/project does not already exist 
+                                    # Check to make sure the channel/project/role does not already exist 
                                     if projectName in [channel.name for channel in category.channels]:
                                         await message.author.create_dm()
                                         async with message.author.typing():
                                             await message.author.send(f"The project, {projectName}, already exists!")
+                                    elif projectName in [role.name for role in message.guild.roles]:
+                                        await message.author.create_dm()
+                                        async with message.author.typing():
+                                            await message.author.send(f"The role, {projectName}, already exists!")
                                     else:
                                         # Get the new project lead
                                         newProjectLead = message.guild.get_member_named(message.content.split(' ')[2])
                                         print(f"Project lead: {newProjectLead}")
-                                        # Assign Permissions to Project role (Add in specific permissions later, this is just the skeleton)
-                                        projectPerms = discord.Permissions(send_messages = False)
                                         # Create the Project role
                                         projectRole = await message.guild.create_role(name=projectName, permissions=projectPerms)
                                         # Create the project channel
-                                        projectChannel = await message.guild.create_text_channel(name=projectName)
-                                        #Later, add "category="Projects"" after "name=projectName", currently this doesn't work however
+                                        projectChannel = await message.guild.create_text_channel(name=projectName,category=category)
                                         
-
-
                                         if subChatBool:
                                             print(f"Subchat: {subChatBool}")
                                             # Setup Sub-chat category & channel
@@ -139,7 +139,7 @@ class ERPLBot(discord.Client):
                                         await newProjectLead.add_roles(message.guild.get_role(PROJECT_ROLE_ID), reason=f'Project creation by {message.author}')
                                         await newProjectLead.add_roles(projectRole, reason=f'Project creation by {message.author}')
                                         await newProjectLead.send(f"Project {projectName} created by {message.author}!") 
-                                        #Send a message back to confirm creation
+                                        # Send a message back to confirm creation
                                         await message.channel.send(f"Project {projectName} created!")
                         
                         except Exception as e:
@@ -151,39 +151,44 @@ class ERPLBot(discord.Client):
             except Exception as e:
                 print(f"An exception occured while creating a new project:\n{e}")
 
-            #Command for deleting an old project 
+            """
+            Delete Project Command (Officers Only)
+            """
             try:
                 if '/DeleteProject' in message.content:
-
-                    #Check to make sure the person sending the message has correct role:
-                    # Comb through the roles of who sent the message to look for Officer name  
-                    if OFFICER_ROLE_ID in message.author.roles:
-
-                        #attempt to split and save the project name
+                    # Check to make sure the person sending the message has officer role
+                    if OFFICER_ROLE_ID in list(map(lambda role: role.id, message.author.roles)):
+                        # Attempt to split and save the project name
                         try:
                             if len(message.content.split(' '))<2:
                                await message.author.send("Project name is empty")
                             projectName = message.content.split(' ')[1]
-                            # get category, names, and channels
-                            for category in message.guild.categories:                                  
+                            # Get category, names, and channels
+                            for category in message.guild.categories:
                                 if category.name == "Projects":
                                     print(category.channels)
-                                    #Check to make sure the channel/project already exist 
+                                    # Check to make sure the channel/project already exists 
                                     if projectName in [channel.name for channel in category.channels]:
-                                        # Locate the Project Lead by role
-                                        oldProjectLead = message.guild
+                                        for channel in message.guild.categories.channels:
+                                            if channel.name == projectName:
+                                                # Locate the Project Lead by permissions
+                                                oldProjectLead = channel
 
-                                        # Hide Old Channels / Sub-chats
-
-                                        # Remove the project role from everyone
-                                        
-                                        # Remove the role from project lead
-                                        oldProjectLead.remove_roles(message.guild.get_role(PROJECT_ROLE_ID))
-                                        oldProjectLead.remove_roles(projectRole)
-                                        # Delete Role (not tested, as i couldnt get the /deleteproject to work)
-                                        await projectRole.delete()
-                                        # Send a message back to confirm deletion
-                                        await message.channel.send(f"Project {projectName} deleted!")
+                                                # Hide Old Project Channel
+                                                await channel.set_permissions(message.guild.get_role(MEMBER_ROLE_ID), view_channel=False, read_messages=False, send_messages=False, reason='Project Deleted')
+                                                await channel.set_permissions(message.guild.get_role(RECRUIT_ROLE_ID), view_channel=False, read_messages=False, send_messages=False, reason='Project Deleted')
+                                                await channel.set_permissions(message.guild.get_role(PROJECT_ROLE_ID), view_channel=False, read_messages=False, send_messages=False, reason='Project Deleted')
+                                                await channel.set_permissions(message.guild.get_role(OFFICER_ROLE_ID), view_channel=False, read_messages=False, send_messages=False, reason='Project Deleted')
+                                                # Loop through categories to locate sub-chats
+                                                for category in message.guild.categories:
+                                                    if category.name == projectName+" sub-chats":
+                                                        await category.set_permissions(message.guild.get_role(PROJECT_ROLE_ID), view_channel=False, read_messages=False, send_messages=False,reason='Project Deleted')
+                                                        await category.set_permissions(message.guild.get_role(OFFICER_ROLE_ID), view_channel=False, read_messages=False, send_messages=False,reason='Project Deleted')
+                                                # Delete Role (not tested, as i couldnt get the /deleteproject to work)
+                                                if projectName in [role.name for role in message.guild.roles]:
+                                                    await projectRole.delete(reason='Project Deleted')
+                                                # Send a message back to confirm deletion
+                                                await message.channel.send(f"Project {projectName} deleted!")
                                         
                                     else:
                                         await message.author.create_dm()
@@ -198,26 +203,6 @@ class ERPLBot(discord.Client):
 
             except Exception as e:
                 print(f"An exception occured while deleting an old project:\n{e}")
-        
-        #Command for direct input 
-        if '/Eval' in message.content:
-            try:
-                if OFFICER_ROLE_ID in message.author.roles:
-                    print('Eval:\n')
-                    print(message.content.split(" ",1)[1].split("```\n",1)[1].split("```",1)[0])
-                    string = message.content.split(' ',1)[1].split("```\n",1)[1].split("```",1)[0]
-                    try:
-                        await message.author.send(await eval(string,{},{'message':message,'discord':discord,'client':discord.Client}))
-                    except Exception as e:
-                        print("Failed eval:\n")
-                        print(e)
-            except:
-                print("Failed parse")
-                print(message.content)
-            try:
-                await message.delete()
-            except:
-                print("Failed to delete")
 
         # WaterLubber easteregg
         try:
@@ -226,24 +211,17 @@ class ERPLBot(discord.Client):
                     await message.guild.me.edit(nick='Waterlubber')
                     await message.channel.send('*Hello my name is Paul and I like to code!*')
                     await message.guild.me.edit(nick='ERPL Discord Bot')
-
         except Exception as e:
             print(f"An exception occurred during Waterlubber:\n{e}")
-
-        
-
             
     async def update_members(self, guild):
         """
         Updates all members in the ERPL Discord by checking their names, roles, and the spreadsheet
         """
-
         # "Guild" is the internal name for servers. This gets all members currently in the server
         discord_members = await guild.fetch_members().flatten()
-
         # Retrieves all current ERPL members listed in the spreadsheet as ClubMember instances
         spreadsheet_members = get_members_from_spreadsheet(google_sheets, SPREADSHEET_ID, SHEET_NAME + ':'.join([RANGE_START, RANGE_END]))
-
         # Loop through each member in the Discord
         for discord_member in discord_members:
             # Let's check if it is even worth our time to check if they are in the spreadsheet
@@ -251,42 +229,32 @@ class ERPLBot(discord.Client):
             if MEMBER_ROLE_ID in list(map(lambda role: role.id, discord_member.roles)):
                 # Then just skip over them
                 continue
-            
             # If they don't have the role, we need to check if they are in the spreadsheet
             # First though, we need to get their name
             name = None
-
             # If this member has no nickname
             if discord_member.nick is None:
                 name = Name.from_str(discord_member.name)
-
             # If they do have a nickname
             else:
                 name = Name.from_str(discord_member.nick)
-
             # Iterate through each member in the spreadsheet (Ideally we would search the reverse of this list getting the most recent entries)
             for member in spreadsheet_members:
                 # Check if their name is in the spreadsheet
                 if name == member.name:
                     #Check to see if they are not already rolled
                     if member.rolled is False:
-
                         # Create a DM channel if non-existent
                         if discord_member.dm_channel is None:
                             await discord_member.create_dm()
-
                         async with discord_member.dm_channel.typing():
                             # If it is, then we need to add the member role
                             await discord_member.add_roles(guild.get_role(MEMBER_ROLE_ID), reason='Found user in club spreadsheet')
-
                             # We also need to make sure they are marked as added in the spreadsheet
                             member.update_rolled(google_sheets, SPREADSHEET_ID, SHEET_NAME, RANGE_END, True)
-
                             # We also need to remove the recruit role
-                            await discord_member.remove_roles(guild.get_role(RECRUIT_ROLE_ID))
-
+                            await discord_member.remove_roles(guild.get_role(RECRUIT_ROLE_ID), reason='Found user in club spreadsheet')
                             print(f'Added member role to {name}')
-
                             # Send a DM confirming the membership
                             await discord_member.send(f'Hello {name}, you have been given membership on the ERPL discord server!')
                             await discord_member.send(f"Some reccomendations:\nMake the #announcements channel always alert you.\nRead the #rules, *there's useful info in there*.\nIf there's a project you want to join, you may want to unmute that chat too.\nFeel free to dm any of the project leads/officers with questions.")
@@ -299,17 +267,13 @@ def main():
     Our "main" function
     """
     global creds
-
     # Reads our Google API credentials before starting the bot
     creds = retrieve_credentials()
-
     # Sets up our intents as a Discord Bot
     intents = discord.Intents.default()
     intents.members = True
-
     # Connects to Discord and runs our bot with the bot's token
     client = ERPLBot(intents=intents)
     client.run(BOT_TOKEN)
-
 if __name__ == "__main__":
     main()
