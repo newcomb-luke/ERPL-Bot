@@ -23,7 +23,7 @@ def parseCommand(self,message,roleIDs = [MEMBER_ROLE_ID, OFFICER_ROLE_ID, PROJEC
                 # Attempt to split and save the project name
                 try:
                     if len(spaceSplitContent)<2:
-                    await author.send("Project name is empty")
+                        await author.send("Project name is empty")
                     projectName = spaceSplitContent[1]
                     print(spaceSplitContent)
                     if len(spaceSplitContent)>=4:
