@@ -53,7 +53,7 @@ class ERPLBot(discord.Client):
             await self.update_members(member.guild)
 
         # Message member on join with welcome message
-        await member.send(f"Hello <@!{member.id}>, welcome to *ERPL*!\n Please read our rules on <#{751973296114761788}> & we hope you rocket to success with us. 🚀\n If you've paid dues, Please set your nick to the name you filled out in payment of dues.\n *<@!{801184786580242552}> should do the rest. (if it doesn't work, complain in <#{751980318025580654}> )*\n This will get you access to project channels.")
+        await member.send(f"Hello <@!{member.id}>, welcome to *ERPL*!\n Please read our rules on <#{751973296114761788}> *(There is actually useful info in there)* & we hope you rocket to success with us. 🚀\n If you've paid dues, Please set your nick to the name you filled out in payment of dues.\n *<@!{801184786580242552}> should do the rest. (if it doesn't work, complain in <#{751980318025580654}> )*\n This will get you access to project channels.")
     
     async def on_member_leave(self, discord_member):
         """
