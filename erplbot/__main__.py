@@ -47,15 +47,13 @@ class ERPLBot(discord.Client):
             embed = discord.Embed(
                 title="*We hope you rocket to success with us!* :rocket: <:ERPL:809226558988484608>",
                 colour=discord.Colour(0x255c6),
-                description="<@!${user.id}> Welcome to **ERPL**! Please read our rules on <#${751973296114761788}>.\r\n If you've paid dues, Please set your nick to the name you filled out in payment of dues...\n *<@!${801184786580242552}> should do the rest. This will get you access to project channels.*")
+                description=f"<@!${user.id}> Welcome to **ERPL**! Please read our rules on <#${751973296114761788}>.\r\n If you've paid dues, Please set your nick to the name you filled out in payment of dues...\n *<@!${801184786580242552}> should do the rest. This will get you access to project channels.*")
             embed.set_thumbnail(url="https://discord.com/assets/748ff0e7b2f1f22adecad8463de25945.svg")
             embed.set_author(name="Welcome to the Experimental Rocket Propulsion Lab!")
-            await JOIN_CHANNEL.send(embed=embed)
+            await member.guild.get_channel(JOIN_CHANNEL).send(embed=embed)
 
         # Message member on join with welcome message
         await member.send(f"Hello {member.name}, welcome to *ERPL*!\n Please read our rules on #rules-info & we hope you rocket to success with us. 🚀\n If you've paid dues, Please set your nick to the name you filled out in payment of dues.\n *@ERPLDiscordBot should do the rest. (if it doesn't work, complain in #join-boost-system )*\n This will get you access to project channels.")
-        # Update members
-        await self.update_members(member.guild)
     
     async def on_member_leave(self, discord_member):
         """
